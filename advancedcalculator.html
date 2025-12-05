@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Calculator</title>
+<style>
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #121212;
+    font-family: Arial, sans-serif;
+    color: #fff;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  body.light {
+    background: #f2f2f2;
+    color: #000;
+  }
+
+  .calculator {
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    width: 320px;
+  }
+
+  body.light .calculator {
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  }
+
+  #display {
+    width: 100%;
+    height: 50px;
+    font-size: 24px;
+    text-align: right;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border: none;
+    background: #222;
+    color: #fff;
+  }
+
+  body.light #display {
+    background: #eee;
+    color: #000;
+  }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+
+  button {
+    padding: 15px;
+    font-size: 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  button:hover {
+    opacity: 0.8;
+  }
+
+  .operator { background: #f57c00; color: #fff; }
+  .equal { background: #4caf50; color: #fff; grid-column: span 2; }
+  .clear { background: #e53935; color: #fff; }
+  .func { background: #2196f3; color: #fff; }
+
+  .theme-btn {
+    background: #9c27b0; color: #fff; grid-column: span 5;
+  }
+
+  #history {
+    margin-top: 15px;
+    max-height: 100px;
+    overflow-y: auto;
+    background: #222;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+
+  body.light #history {
+    background: #eee;
+    color: #000;
+  }
+</style>
+</head>
+<body>
+
+<div class="calculator">
+  <input type="text" id="display" disabled placeholder="0">
+  <div class="buttons">
+    <button class="clear">C</button>
+    <button class="func">sin</button>
+    <button class="func">cos</button>
+    <button class="func">tan</button>
+    <button class="operator">/</button>
+
+    <button>7</button>
+    <button>8</button>
+    <button>9</button>
+    <button class="operator">*</button>
+    <button class="func">sqrt</button>
+
+    <button>4</button>
+    <button>5</button>
+    <button>6</button>
+    <button class="operator">-</button>
+    <button class="func">log</button>
+
+    <button>1</button>
+    <button>2</button>
+    <button>3</button>
+    <button class="operator">+</button>
+    <button class="equal">=</button>
+
+    <button>0</button>
+    <button>.</button>
+    <button class="operator">%</button>
+    <button class="operator">^</button>
+    <button class="theme-btn">Toggle Theme</button>
+  </div>
+  <div id="history"></div>
+</div>
+
+<script>
+const display = document.getElementById('display');
+const buttons = document.querySelectorAll('button');
+const historyDiv = document.getElementById('history');
+let currentInput = '';
+
+function addHistory(entry){
+  const div = document.createElement('div');
+  div.textContent = entry;
+  historyDiv.prepend(div);
+}
+
+buttons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const val = btn.textContent;
+
+    if(val === 'C'){
+      currentInput = '';
+      display.value = '';
+    } else if(val === '='){
+      try {
+        let result = currentInput
+          .replace(/sin/g, 'Math.sin')
+          .replace(/cos/g, 'Math.cos')
+          .replace(/tan/g, 'Math.tan')
+          .replace(/log/g, 'Math.log10')
+          .replace(/sqrt/g, 'Math.sqrt')
+          .replace(/\^/g, '**')
+          .replace(/%/g, '/100');
+
+        result = eval(result);
+        addHistory(currentInput + ' = ' + result);
+        display.value = result;
+        currentInput = result.toString();
+      } catch {
+        display.value = 'Error';
+      }
+    } else if(val === 'Toggle Theme'){
+      document.body.classList.toggle('light');
+    } else {
+      currentInput += val;
+      display.value = currentInput;
+    }
+  });
+});
+
+// Keyboard support
+document.addEventListener('keydown', e => {
+  const keys = '0123456789+-*/.%^';
+  if(keys.includes(e.key)){
+    currentInput += e.key;
+    display.value = currentInput;
+  } else if(e.key === 'Enter'){
+    document.querySelector('.equal').click();
+  } else if(e.key === 'Backspace'){
+    currentInput = currentInput.slice(0,-1);
+    display.value = currentInput;
+  } else if(e.key === 'Escape'){
+    document.querySelector('.clear').click();
+  }
+});
+</script>
+
+</body>
+</html>
